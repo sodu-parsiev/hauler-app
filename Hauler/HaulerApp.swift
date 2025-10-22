@@ -22,7 +22,7 @@ private struct HomeView: View {
                 Section("Safari Extension") {
                     Text("You can re-open Safari to use the Hauler extension.")
                         .font(.body)
-                    Button("Open Safari Test Page", action: openSafariTestPage)
+                    Button("Open Safari", action: openSafariWelcomePage)
                     Button("Open App Settings", action: openAppSettings)
                 }
 
