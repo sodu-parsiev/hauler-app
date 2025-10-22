@@ -6,9 +6,48 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F7092DAF2E9F0B6200D17F97 /* Hauler Safari.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F7092D972E9F0B6200D17F97 /* Hauler Safari.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F7092DAD2E9F0B6200D17F97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7092D7B2E9F09F500D17F97 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F7092D962E9F0B6200D17F97;
+			remoteInfo = "Hauler Safari";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F7092DB42E9F0B6200D17F97 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F7092DAF2E9F0B6200D17F97 /* Hauler Safari.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		F7092D832E9F09F500D17F97 /* Hauler.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hauler.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F7092D972E9F0B6200D17F97 /* Hauler Safari.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Hauler Safari.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F7092DB02E9F0B6200D17F97 /* Exceptions for "Hauler Safari" folder in "Hauler Safari" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F7092D962E9F0B6200D17F97 /* Hauler Safari */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		F7092D852E9F09F500D17F97 /* Hauler */ = {
@@ -16,10 +55,29 @@
 			path = Hauler;
 			sourceTree = "<group>";
 		};
+		F7092D982E9F0B6200D17F97 /* Hauler Safari */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F7092DB02E9F0B6200D17F97 /* Exceptions for "Hauler Safari" folder in "Hauler Safari" target */,
+			);
+			explicitFolders = (
+				Resources/_locales,
+				Resources/images,
+			);
+			path = "Hauler Safari";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		F7092D802E9F09F500D17F97 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F7092D942E9F0B6200D17F97 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				F7092D852E9F09F500D17F97 /* Hauler */,
+				F7092D982E9F0B6200D17F97 /* Hauler Safari */,
 				F7092D842E9F09F500D17F97 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				F7092D832E9F09F500D17F97 /* Hauler.app */,
+				F7092D972E9F0B6200D17F97 /* Hauler Safari.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -55,10 +115,12 @@
 				F7092D7F2E9F09F500D17F97 /* Sources */,
 				F7092D802E9F09F500D17F97 /* Frameworks */,
 				F7092D812E9F09F500D17F97 /* Resources */,
+				F7092DB42E9F0B6200D17F97 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F7092DAE2E9F0B6200D17F97 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F7092D852E9F09F500D17F97 /* Hauler */,
@@ -69,6 +131,28 @@
 			productName = Hauler;
 			productReference = F7092D832E9F09F500D17F97 /* Hauler.app */;
 			productType = "com.apple.product-type.application";
+		};
+		F7092D962E9F0B6200D17F97 /* Hauler Safari */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F7092DB12E9F0B6200D17F97 /* Build configuration list for PBXNativeTarget "Hauler Safari" */;
+			buildPhases = (
+				F7092D932E9F0B6200D17F97 /* Sources */,
+				F7092D942E9F0B6200D17F97 /* Frameworks */,
+				F7092D952E9F0B6200D17F97 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F7092D982E9F0B6200D17F97 /* Hauler Safari */,
+			);
+			name = "Hauler Safari";
+			packageProductDependencies = (
+			);
+			productName = "Hauler Safari";
+			productReference = F7092D972E9F0B6200D17F97 /* Hauler Safari.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +165,9 @@
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					F7092D822E9F09F500D17F97 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
+					F7092D962E9F0B6200D17F97 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
@@ -100,12 +187,20 @@
 			projectRoot = "";
 			targets = (
 				F7092D822E9F09F500D17F97 /* Hauler */,
+				F7092D962E9F0B6200D17F97 /* Hauler Safari */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		F7092D812E9F09F500D17F97 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F7092D952E9F0B6200D17F97 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +217,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F7092D932E9F0B6200D17F97 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F7092DAE2E9F0B6200D17F97 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F7092D962E9F0B6200D17F97 /* Hauler Safari */;
+			targetProxy = F7092DAD2E9F0B6200D17F97 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		F7092D8E2E9F09F700D17F97 /* Debug */ = {
@@ -251,6 +361,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HAS827GYBK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -263,7 +374,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = hauler.Hauler;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sodikjon.hauler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -282,6 +393,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HAS827GYBK;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -294,11 +406,75 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = hauler.Hauler;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sodikjon.hauler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F7092DB22E9F0B6200D17F97 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Hauler Safari/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Hauler Safari";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sodikjon.hauler.safari;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F7092DB32E9F0B6200D17F97 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Hauler Safari/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Hauler Safari";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sodikjon.hauler.safari;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -323,6 +499,15 @@
 			buildConfigurations = (
 				F7092D912E9F09F700D17F97 /* Debug */,
 				F7092D922E9F09F700D17F97 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F7092DB12E9F0B6200D17F97 /* Build configuration list for PBXNativeTarget "Hauler Safari" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F7092DB22E9F0B6200D17F97 /* Debug */,
+				F7092DB32E9F0B6200D17F97 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

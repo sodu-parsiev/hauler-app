@@ -1,0 +1,14 @@
+#hauler-banner {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: 12px; z-index: 2147483647; display: flex; gap: 8px;
+  padding: 10px 12px; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  background: rgba(20,20,20,.92); color: #fff; font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+#hauler-banner button { border: 0; padding: 8px 12px; border-radius: 10px; }
+#hauler-banner .primary { background: #fff; color: #111; }
+#hauler-banner .secondary { background: #2a2a2a; color: #fff; }
+#hauler-banner .close { background: transparent; font-size: 18px; padding: 0 8px; }
+@media (prefers-color-scheme: light) {
+  #hauler-banner { background: rgba(255,255,255,.95); color: #111; }
+  #hauler-banner .secondary { background: #f0f0f0; color: #111; }
+}
