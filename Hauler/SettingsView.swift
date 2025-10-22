@@ -7,7 +7,7 @@ struct SettingsView: View {
             List {
                 Section("Safari Extension") {
                     Text("Enable the Hauler extension in Safari to use it on marketplace pages.")
-                    Button("Open Safari Test Page", action: openSafariTestPage)
+                    Button("Open Safari", action: openSafariWelcomePage)
                     Button("Open App Settings", action: openAppSettings)
                 }
                 Section("Community") {

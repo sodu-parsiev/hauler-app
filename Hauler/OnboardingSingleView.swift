@@ -62,11 +62,11 @@ struct OnboardingSingleView: View {
                 // MARK: - Buttons
                 VStack(spacing: 12) {
                     Button {
-                        openSafariTestPage()
+                        openSafariWelcomePage()
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.up.right.square")
-                            Text("Open Safari Test Page")
+                            Text("Open Safari")
                                 .fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity)
