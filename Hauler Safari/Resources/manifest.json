@@ -5,7 +5,10 @@
   "description": "Open marketplace links in Hauler and access community tools directly.",
   "permissions": ["storage", "scripting", "activeTab", "clipboardWrite"],
   "host_permissions": [
-    "<all_urls>"
+    "*://*.taobao.com/*",
+    "*://*.tmall.com/*",
+    "*://*.weidian.com/*",
+    "*://*.1688.com/*"
   ],
   "background": {
     "service_worker": "background.js",
