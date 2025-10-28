@@ -3,6 +3,7 @@ const REQUIRED_ORIGINS = [
   '*://*.tmall.com/*',
   '*://*.weidian.com/*',
   '*://*.1688.com/*',
+  '*://*.cnfans.com/*',
 ];
 
 const extensionApi = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
