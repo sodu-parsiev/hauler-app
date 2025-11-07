@@ -8,7 +8,7 @@
 
    // run only on supported marketplaces
    const host = location.hostname;
-   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$|(?:^|\.)oopbuy\.com$/.test(host);
+   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$|(?:^|\.)oopbuy\.com$|(?:^|\.)kakobuy\.com$/.test(host);
    if (!isMarketplace) return;
 
    // avoid double inject
@@ -88,6 +88,12 @@
           return toHaulerbuyLink(mappedUrl);
         }
       }
+       if (/kakobuy\.com$/.test(u.hostname)) {
+         const marketplaceUrl = u.searchParams.get("url");
+         if (marketplaceUrl) {
+           return toHaulerbuyLink(marketplaceUrl);
+         }
+       }
     } catch (_) {}
     return null;
   }
