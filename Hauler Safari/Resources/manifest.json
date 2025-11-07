@@ -5,7 +5,16 @@
   "description": "Open marketplace links in Hauler and access community tools directly.",
   "permissions": ["storage", "scripting", "activeTab", "clipboardWrite"],
   "host_permissions": [
-    "<all_urls>"
+    "*://1688.com/*",
+    "*://*.1688.com/*",
+    "*://taobao.com/*",
+    "*://*.taobao.com/*",
+    "*://tmall.com/*",
+    "*://*.tmall.com/*",
+    "*://weidian.com/*",
+    "*://*.weidian.com/*",
+    "*://acbuy.com/*",
+    "*://*.acbuy.com/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -13,7 +22,18 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "*://1688.com/*",
+        "*://*.1688.com/*",
+        "*://taobao.com/*",
+        "*://*.taobao.com/*",
+        "*://tmall.com/*",
+        "*://*.tmall.com/*",
+        "*://weidian.com/*",
+        "*://*.weidian.com/*",
+        "*://acbuy.com/*",
+        "*://*.acbuy.com/*"
+      ],
       "js": ["content.js"],
       "css": ["banner.css"],
       "run_at": "document_idle",
@@ -23,7 +43,18 @@
   "web_accessible_resources": [
     {
       "resources": ["welcome.html"],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "*://1688.com/*",
+        "*://*.1688.com/*",
+        "*://taobao.com/*",
+        "*://*.taobao.com/*",
+        "*://tmall.com/*",
+        "*://*.tmall.com/*",
+        "*://weidian.com/*",
+        "*://*.weidian.com/*",
+        "*://acbuy.com/*",
+        "*://*.acbuy.com/*"
+      ]
     }
   ],
   "action": {

@@ -8,7 +8,7 @@
 
    // run only on supported marketplaces
    const host = location.hostname;
-   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$/.test(host);
+   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)acbuy\.com$/.test(host);
    if (!isMarketplace) return;
 
    // avoid double inject
@@ -19,6 +19,25 @@
      try {
        const u = new URL(urlStr);
 
+       if (/acbuy\.com$/.test(u.hostname)) {
+         const id = u.searchParams.get("id");
+         const source = (u.searchParams.get("source") || "").toLowerCase();
+         if (id && source) {
+           const sourceMap = {
+             al: "1688",
+             ali: "1688",
+             tb: "taobao",
+             tm: "taobao",
+             tao: "taobao",
+             wd: "weidian"
+           };
+           for (const [key, slug] of Object.entries(sourceMap)) {
+             if (source === key || source.startsWith(key)) {
+               return `https://haulerbuy.com/m/${slug}?id=${encodeURIComponent(id)}`;
+             }
+           }
+         }
+       }
        if (/weidian\.com$/.test(u.hostname)) {
          const id = u.searchParams.get("itemID") || u.searchParams.get("itemid");
          if (id) return `https://haulerbuy.com/m/weidian?id=${encodeURIComponent(id)}`;
