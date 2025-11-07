@@ -8,7 +8,7 @@
 
    // run only on supported marketplaces
    const host = location.hostname;
-   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$/.test(host);
+  const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$/.test(host);
    if (!isMarketplace) return;
 
    // avoid double inject
@@ -43,6 +43,26 @@
            mappedUrl = `https://item.taobao.com/item.htm?id=${encodeURIComponent(id)}`;
          } else if (shopType === "1688") {
            mappedUrl = `https://detail.1688.com/offer/${encodeURIComponent(id)}.html`;
+         }
+
+         if (mappedUrl) {
+           return toHaulerbuyLink(mappedUrl);
+         }
+       }
+       if (/acbuy\.com$/.test(u.hostname)) {
+         const id = u.searchParams.get("id");
+         const source = (u.searchParams.get("source") || "").toUpperCase();
+         if (!id) return null;
+
+         let mappedUrl = null;
+         if (source === "AL") {
+           mappedUrl = `https://detail.1688.com/offer/${encodeURIComponent(id)}.html`;
+         } else if (source === "TB") {
+           mappedUrl = `https://item.taobao.com/item.htm?id=${encodeURIComponent(id)}`;
+         } else if (source === "TM") {
+           mappedUrl = `https://detail.tmall.com/item.htm?id=${encodeURIComponent(id)}`;
+         } else if (source === "WD") {
+           mappedUrl = `https://weidian.com/item.html?itemID=${encodeURIComponent(id)}`;
          }
 
          if (mappedUrl) {

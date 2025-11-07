@@ -4,6 +4,7 @@ const REQUIRED_ORIGINS = [
   '*://*.weidian.com/*',
   '*://*.1688.com/*',
   '*://*.cnfans.com/*',
+  '*://*.acbuy.com/*',
 ];
 
 const extensionApi = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);

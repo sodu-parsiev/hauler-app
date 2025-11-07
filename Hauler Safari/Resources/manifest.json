@@ -9,7 +9,8 @@
     "*://*.tmall.com/*",
     "*://*.weidian.com/*",
     "*://*.1688.com/*",
-    "*://*.cnfans.com/*"
+    "*://*.cnfans.com/*",
+    "*://*.acbuy.com/*"
   ],
   "background": {
     "service_worker": "background.js",
