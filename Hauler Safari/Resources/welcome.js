@@ -4,6 +4,7 @@ const REQUIRED_ORIGINS = [
   '*://*.weidian.com/*',
   '*://*.1688.com/*',
   '*://*.cnfans.com/*',
+  '*://*.kakobuy.com/*',
   '*://*.acbuy.com/*',
   '*://*.oopbuy.com/*',
 ];
