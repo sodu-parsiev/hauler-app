@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hauler Helper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Open marketplace links in Hauler and access community tools directly.",
   "permissions": ["storage", "scripting", "activeTab", "clipboardWrite"],
   "host_permissions": [
@@ -10,7 +10,8 @@
     "*://*.weidian.com/*",
     "*://*.1688.com/*",
     "*://*.cnfans.com/*",
-    "*://*.acbuy.com/*"
+    "*://*.acbuy.com/*",
+    "*://*.oopbuy.com/*"
   ],
   "background": {
     "service_worker": "background.js",
