@@ -8,7 +8,7 @@
 
    // run only on supported marketplaces
    const host = location.hostname;
-  const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$/.test(host);
+   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$|(?:^|\.)oopbuy\.com$/.test(host);
    if (!isMarketplace) return;
 
    // avoid double inject
@@ -65,13 +65,32 @@
            mappedUrl = `https://weidian.com/item.html?itemID=${encodeURIComponent(id)}`;
          }
 
-         if (mappedUrl) {
-           return toHaulerbuyLink(mappedUrl);
-         }
-       }
-     } catch (_) {}
-     return null;
-   }
+        if (mappedUrl) {
+          return toHaulerbuyLink(mappedUrl);
+        }
+      }
+      if (/oopbuy\.com$/.test(u.hostname)) {
+        const match = u.pathname.match(/^\/product\/(\d+)\/([^/?#]+)/i);
+        if (!match) return null;
+
+        const [, typeCode, productId] = match;
+        let mappedUrl = null;
+
+        if (typeCode === "0") {
+          mappedUrl = `https://detail.1688.com/offer/${encodeURIComponent(productId)}.html`;
+        } else if (typeCode === "1") {
+          mappedUrl = `https://item.taobao.com/item.htm?id=${encodeURIComponent(productId)}`;
+        } else if (typeCode === "2") {
+          mappedUrl = `https://weidian.com/item.html?itemID=${encodeURIComponent(productId)}`;
+        }
+
+        if (mappedUrl) {
+          return toHaulerbuyLink(mappedUrl);
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
 
    let haulerUrl = toHaulerbuyLink(location.href);
 
