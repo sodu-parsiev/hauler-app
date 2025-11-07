@@ -5,6 +5,7 @@ const REQUIRED_ORIGINS = [
   '*://*.1688.com/*',
   '*://*.cnfans.com/*',
   '*://*.acbuy.com/*',
+  '*://*.oopbuy.com/*',
 ];
 
 const extensionApi = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
