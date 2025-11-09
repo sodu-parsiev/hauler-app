@@ -8,7 +8,7 @@
 
    // run only on supported marketplaces
    const host = location.hostname;
-   const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$|(?:^|\.)oopbuy\.com$|(?:^|\.)kakobuy\.com$/.test(host);
+  const isMarketplace = /(?:^|\.)taobao\.com$|(?:^|\.)tmall\.com$|(?:^|\.)weidian\.com$|(?:^|\.)1688\.com$|(?:^|\.)cnfans\.com$|(?:^|\.)acbuy\.com$|(?:^|\.)oopbuy\.com$|(?:^|\.)kakobuy\.com$|(?:^|\.)mulebuy\.com$/.test(host);
    if (!isMarketplace) return;
 
    // avoid double inject
@@ -42,6 +42,27 @@
          } else if (shopType === "taobao" || shopType === "tmall") {
            mappedUrl = `https://item.taobao.com/item.htm?id=${encodeURIComponent(id)}`;
          } else if (shopType === "1688") {
+           mappedUrl = `https://detail.1688.com/offer/${encodeURIComponent(id)}.html`;
+         }
+
+         if (mappedUrl) {
+           return toHaulerbuyLink(mappedUrl);
+         }
+       }
+       if (/mulebuy\.com$/.test(u.hostname)) {
+         const id = u.searchParams.get("id");
+         const platformRaw = u.searchParams.get("platform") || "";
+         if (!id) return null;
+
+         const platform = platformRaw.toUpperCase();
+         const normalized = platform.replace(/[^A-Z0-9]/g, "");
+         let mappedUrl = null;
+
+         if (normalized.includes("WEIDIAN")) {
+           mappedUrl = `https://weidian.com/item.html?itemID=${encodeURIComponent(id)}`;
+         } else if (normalized.includes("TAOBAO") || normalized.includes("TMALL")) {
+           mappedUrl = `https://item.taobao.com/item.htm?id=${encodeURIComponent(id)}`;
+         } else if (normalized.includes("1688")) {
            mappedUrl = `https://detail.1688.com/offer/${encodeURIComponent(id)}.html`;
          }
 
