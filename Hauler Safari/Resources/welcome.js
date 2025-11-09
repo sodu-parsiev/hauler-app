@@ -4,9 +4,10 @@ const REQUIRED_ORIGINS = [
   '*://*.weidian.com/*',
   '*://*.1688.com/*',
   '*://*.cnfans.com/*',
-  '*://*.kakobuy.com/*',
   '*://*.acbuy.com/*',
   '*://*.oopbuy.com/*',
+  '*://*.kakobuy.com/*',
+  '*://*.mulebuy.com/*',
 ];
 
 const extensionApi = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
