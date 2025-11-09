@@ -49,14 +49,22 @@
            return toHaulerbuyLink(mappedUrl);
          }
        }
-       if (/mulebuy\.com$/.test(u.hostname)) {
-         const id = u.searchParams.get("id");
-         const platformRaw = u.searchParams.get("platform") || "";
-         if (!id) return null;
+      if (/mulebuy\.com$/.test(u.hostname)) {
+        let id = u.searchParams.get("id");
+        let platformRaw = u.searchParams.get("platform");
 
-         const platform = platformRaw.toUpperCase();
-         const normalized = platform.replace(/[^A-Z0-9]/g, "");
-         let mappedUrl = null;
+        if (!id || !platformRaw) {
+          const hashParams = new URLSearchParams((u.hash || "").replace(/^#\/?/, ""));
+          if (!id) id = hashParams.get("id");
+          if (!platformRaw) platformRaw = hashParams.get("platform");
+        }
+
+        if (!id) return null;
+        platformRaw = platformRaw || "";
+
+        const platform = platformRaw.toUpperCase();
+        const normalized = platform.replace(/[^A-Z0-9]/g, "");
+        let mappedUrl = null;
 
          if (normalized.includes("WEIDIAN")) {
            mappedUrl = `https://weidian.com/item.html?itemID=${encodeURIComponent(id)}`;
