@@ -12,7 +12,8 @@
     "*://*.cnfans.com/*",
     "*://*.acbuy.com/*",
     "*://*.oopbuy.com/*",
-    "*://*.kakobuy.com/*"
+    "*://*.kakobuy.com/*",
+    "*://*.mulebuy.com/*"
   ],
   "background": {
     "service_worker": "background.js",
