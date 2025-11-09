@@ -51,7 +51,7 @@
        }
       if (/mulebuy\.com$/.test(u.hostname)) {
         let id = u.searchParams.get("id");
-        let platformRaw = u.searchParams.get("platform");
+        let platformRaw = u.searchParams.get("shoptype");
 
         if (!id || !platformRaw) {
           const hashParams = new URLSearchParams((u.hash || "").replace(/^#\/?/, ""));
