@@ -50,12 +50,17 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		F7092D852E9F09F500D17F97 /* Hauler */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Hauler;
-			sourceTree = "<group>";
-		};
-		F7092D982E9F0B6200D17F97 /* Hauler Safari */ = {
+                F7092D852E9F09F500D17F97 /* Hauler */ = {
+                        isa = PBXFileSystemSynchronizedRootGroup;
+                        path = Hauler;
+                        sourceTree = "<group>";
+                };
+                F7092DBC2E9F0B6300D17F97 /* Shared */ = {
+                        isa = PBXFileSystemSynchronizedRootGroup;
+                        path = Shared;
+                        sourceTree = "<group>";
+                };
+                F7092D982E9F0B6200D17F97 /* Hauler Safari */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				F7092DB02E9F0B6200D17F97 /* Exceptions for "Hauler Safari" folder in "Hauler Safari" target */,
@@ -89,11 +94,12 @@
 /* Begin PBXGroup section */
 		F7092D7A2E9F09F500D17F97 = {
 			isa = PBXGroup;
-			children = (
-				F7092D852E9F09F500D17F97 /* Hauler */,
-				F7092D982E9F0B6200D17F97 /* Hauler Safari */,
-				F7092D842E9F09F500D17F97 /* Products */,
-			);
+                        children = (
+                                F7092D852E9F09F500D17F97 /* Hauler */,
+                                F7092D982E9F0B6200D17F97 /* Hauler Safari */,
+                                F7092DBC2E9F0B6300D17F97 /* Shared */,
+                                F7092D842E9F09F500D17F97 /* Products */,
+                        );
 			sourceTree = "<group>";
 		};
 		F7092D842E9F09F500D17F97 /* Products */ = {
@@ -122,9 +128,10 @@
 			dependencies = (
 				F7092DAE2E9F0B6200D17F97 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				F7092D852E9F09F500D17F97 /* Hauler */,
-			);
+                        fileSystemSynchronizedGroups = (
+                                F7092D852E9F09F500D17F97 /* Hauler */,
+                                F7092DBC2E9F0B6300D17F97 /* Shared */,
+                        );
 			name = Hauler;
 			packageProductDependencies = (
 			);
@@ -144,9 +151,10 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				F7092D982E9F0B6200D17F97 /* Hauler Safari */,
-			);
+                        fileSystemSynchronizedGroups = (
+                                F7092D982E9F0B6200D17F97 /* Hauler Safari */,
+                                F7092DBC2E9F0B6300D17F97 /* Shared */,
+                        );
 			name = "Hauler Safari";
 			packageProductDependencies = (
 			);
