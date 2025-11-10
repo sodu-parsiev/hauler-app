@@ -39,7 +39,7 @@ struct OnboardingSingleView: View {
                     .multilineTextAlignment(.center)
                     .padding(.top, 8)
 
-                Text("Turn on the Hauler Safari extension to open marketplace pages in HaulerBuy and join the community instantly.")
+                Text("Turn on the Hauler Safari extension to open marketplace pages in HaulerBuy and share your referral instantly.")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -102,14 +102,15 @@ struct OnboardingSingleView: View {
                 }
                 .padding(.horizontal, 20)
 
+                // MARK: - Referral Sharing
+                ReferralShareView(layout: .onboarding)
+                    .padding(.horizontal, 20)
+
                 // MARK: - Footer Links
-                HStack(spacing: 16) {
-                    Link("Community", destination: URL(string: "https://haulerbuy.com/community?ref=ios_onboarding")!)
-                    Link("Learn more", destination: URL(string: "https://haulerbuy.com/")!)
-                }
-                .font(.footnote)
-                .foregroundColor(.secondary)
-                .padding(.bottom, 24)
+                Link("Learn more", destination: URL(string: "https://haulerbuy.com/")!)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 24)
             }
         }
     }

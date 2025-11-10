@@ -26,9 +26,7 @@ private struct HomeView: View {
                     Button("Open App Settings", action: openAppSettings)
                 }
 
-                Section("Community") {
-                    Link("Open Community", destination: URL(string: "https://haulerbuy.com/community?ref=ios_app")!)
-                }
+                ReferralSection()
             }
             .navigationTitle("Hauler")
         }
