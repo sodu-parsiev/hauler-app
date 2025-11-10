@@ -8,6 +8,12 @@
 import SafariServices
 import os.log
 
+private enum ExtensionCommand: String {
+    case getReferral
+    case setReferral
+    case referralLink
+}
+
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     func beginRequest(with context: NSExtensionContext) {
@@ -29,14 +35,56 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
         os_log(.default, "Received message from browser.runtime.sendNativeMessage: %@ (profile: %@)", String(describing: message), profile?.uuidString ?? "none")
 
+        let payload = handle(message: message)
+
         let response = NSExtensionItem()
         if #available(iOS 15.0, macOS 11.0, *) {
-            response.userInfo = [ SFExtensionMessageKey: [ "echo": message ] ]
+            response.userInfo = [ SFExtensionMessageKey: payload ]
         } else {
-            response.userInfo = [ "message": [ "echo": message ] ]
+            response.userInfo = [ "message": payload ]
         }
 
         context.completeRequest(returningItems: [ response ], completionHandler: nil)
+    }
+
+    private func handle(message: Any?) -> [String: Any] {
+        guard let message = message as? [String: Any],
+              let commandValue = message["command"] as? String,
+              let command = ExtensionCommand(rawValue: commandValue) else {
+            return ["error": "invalid-command"]
+        }
+
+        switch command {
+        case .getReferral:
+            return referralPayload(using: storedToken())
+        case .setReferral:
+            let rawToken = message["token"] as? String ?? ""
+            let normalized = ReferralSettings.normalizedToken(rawToken)
+            ReferralSettings.sharedDefaults.set(normalized, forKey: ReferralSettings.tokenKey)
+            return referralPayload(using: normalized)
+        case .referralLink:
+            let overrideToken = message["token"] as? String
+            let token = overrideToken.map { token in
+                let normalized = ReferralSettings.normalizedToken(token)
+                return normalized.isEmpty ? storedToken() : normalized
+            } ?? storedToken()
+
+            return referralPayload(using: token)
+        }
+    }
+
+    private func storedToken() -> String {
+        let stored = ReferralSettings.sharedDefaults.string(forKey: ReferralSettings.tokenKey) ?? ""
+        return ReferralSettings.normalizedToken(stored)
+    }
+
+    private func referralPayload(using token: String) -> [String: Any] {
+        let normalized = ReferralSettings.normalizedToken(token)
+        let link = ReferralSettings.referralLink(for: normalized)
+        return [
+            "token": normalized,
+            "link": link.absoluteString
+        ]
     }
 
 }

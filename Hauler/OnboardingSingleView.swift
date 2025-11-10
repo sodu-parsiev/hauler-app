@@ -39,7 +39,7 @@ struct OnboardingSingleView: View {
                     .multilineTextAlignment(.center)
                     .padding(.top, 8)
 
-                Text("Turn on the Hauler Safari extension to open marketplace pages in HaulerBuy and share your referral instantly.")
+                Text("Turn on the Hauler Safari extension to open marketplace pages in HaulerBuy and share your referral from the popup.")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

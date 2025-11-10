@@ -1,1 +1,114 @@
-console.log("Hello World!", browser);
+const extensionAPI = typeof browser !== "undefined" ? browser : chrome;
+
+const tokenInput = document.getElementById("referralToken");
+const saveButton = document.getElementById("saveToken");
+const copyButton = document.getElementById("copyLink");
+const statusElement = document.getElementById("status");
+
+let savedToken = "";
+let statusTimeoutId;
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadReferralToken();
+    tokenInput.addEventListener("input", updateSaveState);
+    saveButton.addEventListener("click", handleSaveToken);
+    copyButton.addEventListener("click", handleCopyLink);
+});
+
+async function sendNativeMessage(payload) {
+    try {
+        const response = await extensionAPI.runtime.sendNativeMessage(payload);
+        return response || {};
+    } catch (error) {
+        console.error("Native message failed", error);
+        throw error;
+    }
+}
+
+async function loadReferralToken() {
+    try {
+        const response = await sendNativeMessage({ command: "getReferral" });
+        if (typeof response.token === "string") {
+            savedToken = response.token;
+            tokenInput.value = savedToken;
+            updateSaveState();
+        }
+    } catch (error) {
+        showStatus("Unable to load referral token", true);
+    }
+}
+
+function updateSaveState() {
+    saveButton.disabled = tokenInput.value === savedToken;
+}
+
+async function handleSaveToken(event) {
+    event.preventDefault();
+
+    try {
+        const response = await sendNativeMessage({
+            command: "setReferral",
+            token: tokenInput.value
+        });
+
+        if (typeof response.token === "string") {
+            savedToken = response.token;
+            tokenInput.value = savedToken;
+            updateSaveState();
+        }
+
+        showStatus("Referral token saved");
+    } catch (error) {
+        showStatus("Unable to save referral token", true);
+    }
+}
+
+async function handleCopyLink(event) {
+    event.preventDefault();
+
+    try {
+        const response = await sendNativeMessage({
+            command: "referralLink",
+            token: tokenInput.value
+        });
+
+        if (typeof response.token === "string") {
+            savedToken = response.token;
+            tokenInput.value = savedToken;
+            updateSaveState();
+        }
+
+        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+            throw new Error("clipboard-unavailable");
+        }
+
+        if (typeof response.link === "string" && response.link.length > 0) {
+            await navigator.clipboard.writeText(response.link);
+            showStatus("Referral link copied");
+        } else {
+            throw new Error("Missing referral link");
+        }
+    } catch (error) {
+        console.error("Copy failed", error);
+        showStatus("Unable to copy referral link", true);
+    }
+}
+
+function showStatus(message, isError = false) {
+    if (statusTimeoutId) {
+        clearTimeout(statusTimeoutId);
+        statusTimeoutId = undefined;
+    }
+
+    statusElement.textContent = message;
+    statusElement.hidden = false;
+    statusElement.classList.toggle("error", isError);
+
+    if (!isError) {
+        statusTimeoutId = setTimeout(() => {
+            statusElement.hidden = true;
+            statusElement.classList.remove("error");
+            statusTimeoutId = undefined;
+        }, 2000);
+    }
+}

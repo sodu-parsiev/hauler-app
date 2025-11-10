@@ -1,12 +1,9 @@
 import SwiftUI
-#if canImport(UIKit)
-import UIKit
-#endif
 
 struct ReferralSection: View {
     var body: some View {
         Section("Referral") {
-            Text("Enter or update your referral token to generate a shareable link.")
+            Text("Enter or update your referral token so you can share it from the extension.")
                 .font(.footnote)
                 .foregroundColor(.secondary)
 
@@ -42,43 +39,56 @@ struct ReferralShareView: View {
     var layout: Layout = .list
 
     @AppStorage(ReferralSettings.tokenKey, store: ReferralSettings.sharedDefaults) private var referralToken: String = ""
-    @State private var didCopy = false
+    @State private var referralTokenDraft: String = ""
+    @State private var didSave = false
 
     var body: some View {
         VStack(alignment: layout.alignment, spacing: 12) {
-            TextField("Referral token", text: $referralToken)
+            TextField("Referral token", text: $referralTokenDraft)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled(true)
                 .keyboardType(.asciiCapable)
                 .textFieldStyle(.roundedBorder)
 
-            Button(action: copyReferralLink) {
-                Label("Share referral link", systemImage: "link")
+            Button(action: saveReferralToken) {
+                Label("Save referral token", systemImage: "tray.and.arrow.down")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .disabled(referralTokenDraft == referralToken)
 
-            if didCopy {
-                Label("Link copied to clipboard", systemImage: "checkmark.circle.fill")
+            if didSave {
+                Label("Referral token saved", systemImage: "checkmark.circle.fill")
                     .font(.footnote)
                     .foregroundColor(.green)
             }
         }
         .frame(maxWidth: .infinity, alignment: layout.containerAlignment)
+        .onAppear(perform: syncDraftWithStoredToken)
+        .onChange(of: referralToken, perform: { _ in syncDraftWithStoredToken() })
+        .onChange(of: referralTokenDraft) { newValue in
+            if didSave && newValue != referralToken {
+                didSave = false
+            }
+        }
     }
 
-    private func copyReferralLink() {
-        let url = ReferralSettings.referralLink(for: referralToken)
-#if canImport(UIKit)
-        UIPasteboard.general.string = url.absoluteString
-#endif
+    private func syncDraftWithStoredToken() {
+        referralTokenDraft = ReferralSettings.normalizedToken(referralToken)
+    }
+
+    private func saveReferralToken() {
+        let normalizedToken = ReferralSettings.normalizedToken(referralTokenDraft)
+        referralToken = normalizedToken
+        referralTokenDraft = normalizedToken
+
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            didCopy = true
+            didSave = true
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                didCopy = false
+                didSave = false
             }
         }
     }

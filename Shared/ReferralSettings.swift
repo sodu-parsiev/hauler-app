@@ -12,8 +12,12 @@ enum ReferralSettings {
         return .standard
     }()
 
+    static func normalizedToken(_ token: String) -> String {
+        token.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     static func referralLink(for token: String) -> URL {
-        let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = normalizedToken(token)
         guard !trimmed.isEmpty,
               let encodedToken = trimmed.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://haulerbuy.com/?ref=\(encodedToken)") else {

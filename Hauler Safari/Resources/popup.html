@@ -6,6 +6,23 @@
     <script type="module" src="popup.js"></script>
 </head>
 <body>
-    <strong>Hello World!</strong>
+    <main>
+        <header>
+            <h1>Hauler referral</h1>
+            <p>Copy your referral link or update the token.</p>
+        </header>
+
+        <label class="field" for="referralToken">
+            <span>Referral token</span>
+            <input id="referralToken" name="referralToken" type="text" autocomplete="off" spellcheck="false" />
+        </label>
+
+        <div class="actions">
+            <button id="saveToken" class="primary">Save token</button>
+            <button id="copyLink" class="secondary">Copy referral link</button>
+        </div>
+
+        <p id="status" role="status" aria-live="polite" hidden></p>
+    </main>
 </body>
 </html>
