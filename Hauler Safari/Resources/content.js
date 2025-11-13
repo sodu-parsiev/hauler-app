@@ -3,8 +3,8 @@
    // CONFIG
    // =======================
    const LOGO_URL = "https://haulerbuy.com/wp-content/uploads/2025/09/cropped-hauler-logo.svg";
-   const SECONDARY_MODE = "community"; // or "copy"
-   const COMMUNITY_URL = "https://haulerbuy.com/community?ref=ios_ext";
+   const HAULER_HOME_URL = "https://haulerbuy.com/";
+   const REFERRAL_SHARE_BASE = "https://haulerbuy.com/?ref=";
 
    // run only on supported marketplaces
    const host = location.hostname;
@@ -127,7 +127,70 @@
     return null;
   }
 
-   let haulerUrl = toHaulerbuyLink(location.href);
+  let haulerUrl = toHaulerbuyLink(location.href);
+  let referralToken = "";
+  let referralTokenPromise = null;
+  let referralTokenFetched = false;
+
+  function getReferralShareLink() {
+    if (!referralToken) return "";
+    return `${REFERRAL_SHARE_BASE}${encodeURIComponent(referralToken)}`;
+  }
+
+  async function fetchReferralToken() {
+    if (referralTokenFetched) return referralToken;
+    if (referralTokenPromise) return referralTokenPromise;
+
+    const pending = (async () => {
+      let token = "";
+      try {
+        if (typeof browser !== "undefined" && browser.runtime?.sendNativeMessage) {
+          const response = await browser.runtime.sendNativeMessage(null, { command: "getReferralToken" });
+          token = response && typeof response.referralToken === "string" ? response.referralToken : "";
+        } else if (typeof safari !== "undefined" && safari.extension?.dispatchMessage && safari.self?.addEventListener) {
+          const messageName = "getReferralToken";
+          token = await new Promise((resolve) => {
+            let resolved = false;
+            const handleMessage = (event) => {
+              if (event.name !== messageName) return;
+              resolved = true;
+              try { safari.self.removeEventListener("message", handleMessage); } catch (_) {}
+              const value = event.message && typeof event.message.referralToken === "string" ? event.message.referralToken : "";
+              resolve(value);
+            };
+
+            try {
+              safari.self.addEventListener("message", handleMessage);
+              safari.extension.dispatchMessage(messageName, { command: "getReferralToken" });
+            } catch (err) {
+              console.warn("Unable to dispatch Safari native message", err);
+              resolve("");
+              return;
+            }
+
+            setTimeout(() => {
+              if (!resolved) {
+                try { safari.self.removeEventListener("message", handleMessage); } catch (_) {}
+                resolve("");
+              }
+            }, 2000);
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to fetch referral token", err);
+      }
+
+      referralToken = token || "";
+      referralTokenFetched = true;
+      return referralToken;
+    })();
+
+    referralTokenPromise = pending;
+
+    return pending.finally(() => {
+      referralTokenPromise = null;
+    });
+  }
 
    // =======================
    // Styles (namespaced hb-*)
@@ -254,18 +317,18 @@
          <img src="${LOGO_URL}" alt="Hauler logo" class="hb-logo-img" />
        </div>
 
-       <div class="hb-title">${haulerUrl ? "Product Found!" : "Need help finding it?"}</div>
-       <div class="hb-sub">
-         ${haulerUrl ? "We detected a marketplace product link." : "Ask the community or open in Hauler if available."}
-       </div>
+      <div class="hb-title">${haulerUrl ? "Product Found!" : "Need help finding it?"}</div>
+      <div class="hb-sub">
+        ${haulerUrl ? "We detected a marketplace product link." : "Open HaulerBuy or share your referral link."}
+      </div>
 
        <div>
-         <a id="hb-open" class="hb-btn hb-btn-primary" target="_blank" rel="noopener noreferrer">
-           ${haulerUrl ? "Open in HaulerBuy" : "Ask Community"}
-         </a>
-         <a id="hb-secondary" class="hb-btn hb-btn-secondary" target="_blank" rel="noopener noreferrer">
-           ${SECONDARY_MODE === "copy" ? "Copy Affiliate Link" : "Community"}
-         </a>
+        <a id="hb-open" class="hb-btn hb-btn-primary" target="_blank" rel="noopener noreferrer">
+          ${haulerUrl ? "Open in HaulerBuy" : "Open HaulerBuy"}
+        </a>
+        <a id="hb-secondary" class="hb-btn hb-btn-secondary" target="_blank" rel="noopener noreferrer">
+          Share referral link
+        </a>
        </div>
      </div>
    `;
@@ -278,33 +341,70 @@
    const titleEl     = overlay.querySelector(".hb-title");
    const subEl       = overlay.querySelector(".hb-sub");
 
-   // Primary button link
-   openBtn.href = haulerUrl || COMMUNITY_URL;
+  const shareLabel = "Share referral link";
 
-   // Secondary button link/behavior
-   if (SECONDARY_MODE === "community") {
-     secondaryBtn.href = COMMUNITY_URL;
-   } else {
-     secondaryBtn.href = "#";
-     secondaryBtn.addEventListener("click", async (e) => {
-       e.preventDefault();
-       const dummy = "https://haulerbuy.com/affiliate?id=example";
-       try {
-         await navigator.clipboard.writeText(dummy);
-         const old = secondaryBtn.textContent;
-         secondaryBtn.textContent = "✓ Copied!";
-         secondaryBtn.style.background = "#4ecdc4";
-         secondaryBtn.style.color = "#fff";
-         setTimeout(() => {
-           secondaryBtn.textContent = old;
-           secondaryBtn.style.background = "#f5f5f5";
-           secondaryBtn.style.color = "#333";
-         }, 1800);
-       } catch {
-         alert("Link copied:\n" + dummy);
-       }
-     });
-   }
+  function updatePrimaryButton() {
+    if (haulerUrl) {
+      openBtn.href = haulerUrl;
+      openBtn.textContent = "Open in HaulerBuy";
+      titleEl.textContent = "Product Found!";
+      subEl.textContent = "We detected a marketplace product link.";
+    } else {
+      const referralLink = getReferralShareLink();
+      openBtn.href = referralLink || HAULER_HOME_URL;
+      openBtn.textContent = "Open HaulerBuy";
+      titleEl.textContent = "Need help finding it?";
+      subEl.textContent = referralLink
+        ? "Share your referral link with shoppers."
+        : "Open HaulerBuy to explore curated finds.";
+    }
+  }
+
+  updatePrimaryButton();
+
+  secondaryBtn.href = "#";
+  secondaryBtn.textContent = shareLabel;
+  secondaryBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    let referralLink = "";
+    try {
+      const token = await fetchReferralToken();
+      if (!token) {
+        window.alert("Add your referral code in the Hauler app before sharing your link.");
+        return;
+      }
+
+      referralLink = `${REFERRAL_SHARE_BASE}${encodeURIComponent(token)}`;
+      if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+        throw new Error("clipboard-unavailable");
+      }
+      await navigator.clipboard.writeText(referralLink);
+
+      const old = shareLabel;
+      secondaryBtn.textContent = "✓ Copied!";
+      secondaryBtn.style.background = "#4ecdc4";
+      secondaryBtn.style.color = "#fff";
+      setTimeout(() => {
+        secondaryBtn.textContent = old;
+        secondaryBtn.style.background = "#f5f5f5";
+        secondaryBtn.style.color = "#333";
+      }, 1800);
+    } catch (err) {
+      console.error("Failed to share referral link", err);
+      const fallbackLink = referralLink || getReferralShareLink();
+      if (fallbackLink) {
+        window.alert(`Copy failed. Your referral link:\n${fallbackLink}`);
+      } else {
+        window.alert("Add your referral code in the Hauler app before sharing your link.");
+      }
+    }
+  });
+
+  fetchReferralToken().then(() => {
+    updatePrimaryButton();
+  }).catch((err) => {
+    console.warn("Unable to preload referral token", err);
+  });
 
    // =======================
    // Confetti
@@ -373,20 +473,10 @@
    const origPush = history.pushState;
    const origReplace = history.replaceState;
 
-   function reeval() {
-     haulerUrl = toHaulerbuyLink(location.href);
-     if (haulerUrl) {
-       openBtn.href = haulerUrl;
-       openBtn.textContent = "Open in HaulerBuy";
-       titleEl.textContent = "Product Found!";
-       subEl.textContent = "We detected a marketplace product link.";
-     } else {
-       openBtn.href = COMMUNITY_URL;
-       openBtn.textContent = "Ask Community";
-       titleEl.textContent = "Need help finding it?";
-       subEl.textContent = "Ask the community or open in Hauler if available.";
-     }
-   }
+  function reeval() {
+    haulerUrl = toHaulerbuyLink(location.href);
+    updatePrimaryButton();
+  }
 
    history.pushState = function () { origPush.apply(this, arguments); setTimeout(reeval, 0); };
    history.replaceState = function () { origReplace.apply(this, arguments); setTimeout(reeval, 0); };

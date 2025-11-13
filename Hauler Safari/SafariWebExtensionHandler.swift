@@ -8,6 +8,11 @@
 import SafariServices
 import os.log
 
+private enum AppGroup {
+    static let identifier = "group.com.sodikjon.hauler"
+    static let referralTokenKey = "referralToken"
+}
+
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     func beginRequest(with context: NSExtensionContext) {
@@ -29,11 +34,21 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
         os_log(.default, "Received message from browser.runtime.sendNativeMessage: %@ (profile: %@)", String(describing: message), profile?.uuidString ?? "none")
 
+        let responseMessage: [String: Any]
+        if let dict = message as? [String: Any],
+           let command = dict["command"] as? String,
+           command == "getReferralToken" {
+            let token = UserDefaults(suiteName: AppGroup.identifier)?.string(forKey: AppGroup.referralTokenKey) ?? ""
+            responseMessage = ["referralToken": token]
+        } else {
+            responseMessage = ["referralToken": ""]
+        }
+
         let response = NSExtensionItem()
         if #available(iOS 15.0, macOS 11.0, *) {
-            response.userInfo = [ SFExtensionMessageKey: [ "echo": message ] ]
+            response.userInfo = [ SFExtensionMessageKey: responseMessage ]
         } else {
-            response.userInfo = [ "message": [ "echo": message ] ]
+            response.userInfo = [ "message": responseMessage ]
         }
 
         context.completeRequest(returningItems: [ response ], completionHandler: nil)
