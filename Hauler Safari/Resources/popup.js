@@ -66,8 +66,11 @@ async function handleSaveToken(event) {
 async function handleCopyLink(event) {
     event.preventDefault();
 
+    let response;
+    let referralLink = "";
+
     try {
-        const response = await sendNativeMessage({
+        response = await sendNativeMessage({
             command: "referralLink",
             token: tokenInput.value
         });
@@ -78,19 +81,23 @@ async function handleCopyLink(event) {
             updateSaveState();
         }
 
+        if (typeof response.link === "string" && response.link.length > 0) {
+            referralLink = response.link;
+        } else {
+            throw new Error("missing-referral-link");
+        }
+
         if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
             throw new Error("clipboard-unavailable");
         }
 
-        if (typeof response.link === "string" && response.link.length > 0) {
-            await navigator.clipboard.writeText(response.link);
-            showStatus("Referral link copied");
-        } else {
-            throw new Error("Missing referral link");
-        }
+        await navigator.clipboard.writeText(referralLink);
+        showStatus("Referral link copied");
     } catch (error) {
         console.error("Copy failed", error);
         showStatus("Unable to copy referral link", true);
+        const fallbackLink = referralLink || "https://haulerbuy.com/";
+        alert(`We couldn't copy your referral link automatically. Copy it manually:\n${fallbackLink}`);
     }
 }
 

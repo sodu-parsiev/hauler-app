@@ -5,13 +5,24 @@
 //  Created by Karl Marx on 10/15/25.
 //
 
+import Foundation
 import SafariServices
 import os.log
 
 private enum ExtensionCommand: String {
-    case getReferral
-    case setReferral
-    case referralLink
+    case getReferralToken = "getReferralToken"
+    case getReferral = "getReferral"
+    case setReferral = "setReferral"
+    case referralLink = "referralLink"
+}
+
+private enum ReferralDefaults {
+    static let appGroupIdentifier = "group.com.hauler.shared"
+    static let tokenKey = "referralToken"
+
+    static var shared: UserDefaults {
+        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+    }
 }
 
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
@@ -48,43 +59,83 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     }
 
     private func handle(message: Any?) -> [String: Any] {
-        guard let message = message as? [String: Any],
-              let commandValue = message["command"] as? String,
-              let command = ExtensionCommand(rawValue: commandValue) else {
-            return ["error": "invalid-command"]
-        }
+        let (payload, messageId) = extractPayloadAndIdentifier(from: message)
+        let commandValue = payload?["command"] as? String
+        let command = commandValue.flatMap(ExtensionCommand.init(rawValue:))
+
+        var response: [String: Any]
 
         switch command {
+        case .getReferralToken:
+            response = [
+                "referralToken": storedToken()
+            ]
         case .getReferral:
-            return referralPayload(using: storedToken())
+            response = [
+                "token": storedToken()
+            ]
         case .setReferral:
-            let rawToken = message["token"] as? String ?? ""
+            let rawToken = payload?["token"] as? String ?? ""
             let normalized = ReferralSettings.normalizedToken(rawToken)
-            ReferralSettings.sharedDefaults.set(normalized, forKey: ReferralSettings.tokenKey)
-            return referralPayload(using: normalized)
+            ReferralDefaults.shared.set(normalized, forKey: ReferralDefaults.tokenKey)
+            response = [
+                "token": normalized
+            ]
         case .referralLink:
-            let overrideToken = message["token"] as? String
-            let token = overrideToken.map { token in
-                let normalized = ReferralSettings.normalizedToken(token)
-                return normalized.isEmpty ? storedToken() : normalized
-            } ?? storedToken()
-
-            return referralPayload(using: token)
+            let providedToken = payload?["token"] as? String ?? ""
+            let normalized = ReferralSettings.normalizedToken(providedToken)
+            let token = normalized.isEmpty ? storedToken() : normalized
+            let link = ReferralSettings.referralLink(for: token).absoluteString
+            response = [
+                "token": token,
+                "link": link
+            ]
+        case .none:
+            response = [
+                "referralToken": storedToken(),
+                "error": "invalid-command"
+            ]
         }
+
+        if let messageId = messageId {
+            response["messageId"] = messageId
+        }
+
+        return response
+    }
+
+    private func extractPayloadAndIdentifier(from message: Any?) -> ([String: Any]?, String?) {
+        var identifier: String?
+        var candidate: Any? = message
+
+        if let container = message as? [String: Any] {
+            identifier = container["messageId"] as? String
+            if let payload = container["payload"] {
+                candidate = payload
+            }
+        }
+
+        if let data = candidate as? Data {
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                return (json, identifier)
+            }
+        }
+
+        if let string = candidate as? String,
+           let data = string.data(using: .utf8),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            return (json, identifier)
+        }
+
+        if let dictionary = candidate as? [String: Any] {
+            return (dictionary, identifier)
+        }
+
+        return (nil, identifier)
     }
 
     private func storedToken() -> String {
-        let stored = ReferralSettings.sharedDefaults.string(forKey: ReferralSettings.tokenKey) ?? ""
+        let stored = ReferralDefaults.shared.string(forKey: ReferralDefaults.tokenKey) ?? ""
         return ReferralSettings.normalizedToken(stored)
     }
-
-    private func referralPayload(using token: String) -> [String: Any] {
-        let normalized = ReferralSettings.normalizedToken(token)
-        let link = ReferralSettings.referralLink(for: normalized)
-        return [
-            "token": normalized,
-            "link": link.absoluteString
-        ]
-    }
-
 }
