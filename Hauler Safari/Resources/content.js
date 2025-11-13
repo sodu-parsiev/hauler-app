@@ -82,20 +82,29 @@
     return "";
   }
 
-  async function getReferralToken() {
-    if (cachedReferralToken !== null) {
+  async function getReferralToken(forceRefresh = false) {
+    if (forceRefresh) {
+      cachedReferralToken = null;
+      referralTokenRequest = null;
+    }
+
+    if (!forceRefresh && typeof cachedReferralToken === "string" && cachedReferralToken.length > 0) {
       return cachedReferralToken;
     }
 
     if (!referralTokenRequest) {
       referralTokenRequest = fetchReferralTokenFromNative()
+        .then((token) => {
+          const normalized = normalizeToken(token);
+          cachedReferralToken = normalized.length > 0 ? normalized : null;
+          referralTokenRequest = null;
+          return normalized;
+        })
         .catch((error) => {
           console.warn("Unable to retrieve referral token", error);
+          cachedReferralToken = null;
+          referralTokenRequest = null;
           return "";
-        })
-        .then((token) => {
-          cachedReferralToken = normalizeToken(token);
-          return cachedReferralToken;
         });
     }
 
@@ -126,8 +135,10 @@
   }
 
   async function shareReferralLink(button) {
-    const token = await getReferralToken();
+    const token = await getReferralToken(true);
     const normalizedToken = normalizeToken(token);
+
+    cachedReferralToken = normalizedToken.length > 0 ? normalizedToken : null;
 
     if (!normalizedToken) {
       alert("Add your referral token in the Hauler app to share your link.");
