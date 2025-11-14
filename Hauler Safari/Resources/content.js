@@ -16,6 +16,7 @@
   if (document.getElementById("hb-overlay") || document.getElementById("hb-launcher")) return;
 
   const extensionRuntime = typeof browser !== "undefined" ? browser : (typeof chrome !== "undefined" ? chrome : null);
+  const BRIDGE_MESSAGE_TYPE = "hauler:native-message";
   let cachedReferralToken = null;
   let referralTokenRequest = null;
 
@@ -23,10 +24,52 @@
     return typeof value === "string" ? value.trim() : "";
   }
 
+  function responseContainsNativeData(response) {
+    if (!response || typeof response !== "object") {
+      return false;
+    }
+
+    if (typeof response.error !== "undefined" && response.error) {
+      return false;
+    }
+
+    if ("referralToken" in response || "token" in response || "link" in response) {
+      return true;
+    }
+
+    if ("success" in response) {
+      return Boolean(response.success);
+    }
+
+    return false;
+  }
+
   async function sendMessageToHost(payload) {
-    if (extensionRuntime && typeof extensionRuntime.runtime?.sendNativeMessage === "function") {
+    const runtimeAPI = extensionRuntime?.runtime;
+    let lastErrorResponse = null;
+
+    if (runtimeAPI && typeof runtimeAPI.sendMessage === "function") {
       try {
-        const response = await extensionRuntime.runtime.sendNativeMessage(payload);
+        const response = await runtimeAPI.sendMessage({
+          type: BRIDGE_MESSAGE_TYPE,
+          payload,
+        });
+
+        if (responseContainsNativeData(response)) {
+          return response;
+        }
+
+        if (response && typeof response === "object" && response.error) {
+          lastErrorResponse = response;
+        }
+      } catch (error) {
+        console.warn("runtime.sendMessage failed", error);
+      }
+    }
+
+    if (runtimeAPI && typeof runtimeAPI.sendNativeMessage === "function") {
+      try {
+        const response = await runtimeAPI.sendNativeMessage(payload);
         if (response && typeof response === "object") {
           return response;
         }
@@ -36,7 +79,7 @@
     }
 
     if (typeof safari !== "undefined" && safari.extension?.dispatchMessage && typeof safari.self !== "undefined") {
-      return new Promise((resolve, reject) => {
+      const safariResponse = await new Promise((resolve, reject) => {
         const messageId = `hauler-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
         function cleanup(result, error) {
@@ -46,7 +89,7 @@
           if (error) {
             reject(error);
           } else {
-            resolve(result || {});
+            resolve(result ?? null);
           }
         }
 
@@ -66,13 +109,20 @@
           cleanup(null, error);
         }
       });
+
+      if (safariResponse !== null && safariResponse !== undefined) {
+        return safariResponse;
+      }
     }
 
-    return {};
+    return lastErrorResponse;
   }
 
   async function fetchReferralTokenFromNative() {
     const response = await sendMessageToHost({ command: "getReferralToken" });
+    if (!response || (typeof response === "object" && response.error)) {
+      return "";
+    }
     if (response && typeof response.referralToken === "string") {
       return normalizeToken(response.referralToken);
     }
