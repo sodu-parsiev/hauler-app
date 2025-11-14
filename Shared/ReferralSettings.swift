@@ -1,15 +1,19 @@
 import Foundation
+import OSLog
 
 enum ReferralSettings {
     static let appGroupIdentifier = "group.com.hauler.shared"
     static let tokenKey = "referralToken"
     static let fallbackURL = URL(string: "https://haulerbuy.com/")!
+    private static let logger = Logger(subsystem: "com.sodikjon.hauler", category: "ReferralSettings")
 
     static let sharedDefaults: UserDefaults = {
-        if let defaults = UserDefaults(suiteName: appGroupIdentifier) {
-            return defaults
+        guard let defaults = UserDefaults(suiteName: appGroupIdentifier) else {
+            assertionFailure("Failed to load shared UserDefaults suite named \(appGroupIdentifier)")
+            logger.error("Failed to load shared UserDefaults suite named \(appGroupIdentifier, privacy: .public). Falling back to UserDefaults.standard.")
+            return .standard
         }
-        return .standard
+        return defaults
     }()
 
     static func normalizedToken(_ token: String) -> String {
