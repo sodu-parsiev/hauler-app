@@ -24,9 +24,43 @@
   }
 
   async function sendMessageToHost(payload) {
-    if (extensionRuntime && typeof extensionRuntime.runtime?.sendNativeMessage === "function") {
+    const runtimeApi = extensionRuntime?.runtime;
+
+    if (runtimeApi && typeof runtimeApi.sendMessage === "function") {
       try {
-        const response = await extensionRuntime.runtime.sendNativeMessage(payload);
+        const response = await new Promise((resolve, reject) => {
+          const message = { type: "hauler-native", payload };
+
+          if (runtimeApi.sendMessage.length >= 2) {
+            runtimeApi.sendMessage(message, (result) => {
+              const lastError = runtimeApi?.lastError;
+              if (lastError) {
+                reject(lastError);
+                return;
+              }
+              resolve(result);
+            });
+          } else {
+            const maybePromise = runtimeApi.sendMessage(message);
+            if (maybePromise && typeof maybePromise.then === "function") {
+              maybePromise.then(resolve).catch(reject);
+            } else {
+              resolve(maybePromise);
+            }
+          }
+        });
+
+        if (response && typeof response === "object") {
+          return response;
+        }
+      } catch (error) {
+        console.warn("runtime.sendMessage failed", error);
+      }
+    }
+
+    if (runtimeApi && typeof runtimeApi.sendNativeMessage === "function") {
+      try {
+        const response = await runtimeApi.sendNativeMessage(payload);
         if (response && typeof response === "object") {
           return response;
         }
