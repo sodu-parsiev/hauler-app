@@ -1,7 +1,9 @@
 // Hauler Safari / Resources/background.js
 const extensionRuntime = typeof browser !== "undefined" ? browser : chrome;
+const logPrefix = "[Hauler Extension]";
 
 extensionRuntime.runtime.onInstalled.addListener(() => {
+  console.debug(logPrefix, "Extension installed — opening welcome page");
   // On macOS this will open a tab with instructions.
   // On iOS behavior may be ignored — harmless to keep.
   extensionRuntime.tabs
@@ -13,15 +15,21 @@ async function sendNativePayload(payload) {
   const api = extensionRuntime.runtime;
   if (!api?.sendNativeMessage) return null;
 
+  console.debug(logPrefix, "Forwarding payload to native host", payload?.command || "unknown");
+
   try {
     // Safari supports a single-argument form; Chromium/Firefox require a host name.
     if (api.sendNativeMessage.length === 1) {
-      return await api.sendNativeMessage(payload);
+      const response = await api.sendNativeMessage(payload);
+      console.debug(logPrefix, "Native response (Safari style)", response);
+      return response;
     }
 
     const manifestHost = api.getManifest?.()?.nativeMessagingHost;
     if (manifestHost) {
-      return await api.sendNativeMessage(manifestHost, payload);
+      const response = await api.sendNativeMessage(manifestHost, payload);
+      console.debug(logPrefix, "Native response (manifest host)", response);
+      return response;
     }
   } catch (error) {
     console.warn("Native messaging failed", error);
@@ -34,8 +42,11 @@ async function handleMessage(request) {
   const payload = request?.payload || request;
   if (!payload || typeof payload !== "object") return {};
 
+  console.debug(logPrefix, "Received message from content script", payload.command || "unknown");
+
   const response = await sendNativePayload(payload);
   if (response && typeof response === "object") {
+    console.debug(logPrefix, "Returning native response to content script", response);
     return response;
   }
 

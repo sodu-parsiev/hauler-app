@@ -16,6 +16,8 @@
   if (document.getElementById("hb-overlay") || document.getElementById("hb-launcher")) return;
 
   const extensionRuntime = typeof browser !== "undefined" ? browser : (typeof chrome !== "undefined" ? chrome : null);
+  const logPrefix = "[Hauler Extension]";
+
   let cachedReferralToken = null;
   let referralTokenRequest = null;
 
@@ -28,11 +30,15 @@
       return {};
     }
 
+    console.debug(logPrefix, "Sending message to background", payload?.command || payload?.type || "unknown");
+
     try {
       const response = await extensionRuntime.runtime.sendMessage({
         type: "hauler:native",
         payload,
       });
+
+      console.debug(logPrefix, "Received response from background", response);
 
       if (response && typeof response === "object") {
         return response;
@@ -45,13 +51,17 @@
   }
 
   async function fetchReferralTokenFromNative() {
+    console.debug(logPrefix, "Requesting referral token from native host");
     const response = await sendMessageToHost({ command: "getReferralToken" });
     if (response && typeof response.referralToken === "string") {
+      console.debug(logPrefix, "Native host returned referralToken field");
       return normalizeToken(response.referralToken);
     }
     if (response && typeof response.token === "string") {
+      console.debug(logPrefix, "Native host returned token field");
       return normalizeToken(response.token);
     }
+    console.debug(logPrefix, "Native host returned no token");
     return "";
   }
 
@@ -62,13 +72,16 @@
     }
 
     if (!forceRefresh && typeof cachedReferralToken === "string" && cachedReferralToken.length > 0) {
+      console.debug(logPrefix, "Using cached referral token");
       return cachedReferralToken;
     }
 
     if (!referralTokenRequest) {
+      console.debug(logPrefix, "Requesting new referral token");
       referralTokenRequest = fetchReferralTokenFromNative()
         .then((token) => {
           const normalized = normalizeToken(token);
+          console.debug(logPrefix, "Normalized referral token", normalized);
           cachedReferralToken = normalized.length > 0 ? normalized : null;
           referralTokenRequest = null;
           return normalized;
@@ -77,6 +90,7 @@
           console.warn("Unable to retrieve referral token", error);
           cachedReferralToken = null;
           referralTokenRequest = null;
+          console.debug(logPrefix, "Cleared cached token after failure");
           return "";
         });
     }
@@ -86,6 +100,7 @@
 
   function buildReferralLink(token) {
     const normalized = normalizeToken(token);
+    console.debug(logPrefix, "Building referral link", normalized);
     if (!normalized) return "";
     return REFERRAL_LINK_TEMPLATE + encodeURIComponent(normalized);
   }
@@ -108,17 +123,21 @@
   }
 
   async function shareReferralLink(button) {
+    console.debug(logPrefix, "Share referral link clicked");
     const token = await getReferralToken(true);
     const normalizedToken = normalizeToken(token);
 
     cachedReferralToken = normalizedToken.length > 0 ? normalizedToken : null;
 
     if (!normalizedToken) {
+      console.debug(logPrefix, "Referral token missing when attempting to share");
       alert("Add your referral token in the Hauler app to share your link.");
       return;
     }
 
     const link = buildReferralLink(normalizedToken) || REFERRAL_BASE_URL;
+
+    console.debug(logPrefix, "Generated referral link", link);
 
     if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
       alert(`Copy this referral link manually:\n${link}`);
