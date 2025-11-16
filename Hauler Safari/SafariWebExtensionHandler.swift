@@ -67,6 +67,8 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
         var response: [String: Any]
 
+        logger.debug("Handling command: \(commandValue ?? "unknown", privacy: .public) (messageId: \(messageId ?? "none", privacy: .public))")
+
         switch command {
         case .getReferralToken:
             let token = storedToken()

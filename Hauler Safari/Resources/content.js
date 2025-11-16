@@ -17,6 +17,7 @@
 
   const extensionRuntime = typeof browser !== "undefined" ? browser : (typeof chrome !== "undefined" ? chrome : null);
   const logPrefix = "[Hauler Extension]";
+  const nextMessageId = () => `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   let cachedReferralToken = null;
   let referralTokenRequest = null;
@@ -30,15 +31,18 @@
       return {};
     }
 
-    console.debug(logPrefix, "Sending message to background", payload?.command || payload?.type || "unknown");
+    const messageId = payload?.messageId || nextMessageId();
+    const enrichedPayload = { ...payload, messageId };
+
+    console.debug(logPrefix, "Sending message to background", payload?.command || payload?.type || "unknown", messageId);
 
     try {
       const response = await extensionRuntime.runtime.sendMessage({
         type: "hauler:native",
-        payload,
+        payload: enrichedPayload,
       });
 
-      console.debug(logPrefix, "Received response from background", response);
+      console.debug(logPrefix, "Received response from background", response, messageId);
 
       if (response && typeof response === "object") {
         return response;
@@ -61,7 +65,7 @@
       console.debug(logPrefix, "Native host returned token field");
       return normalizeToken(response.token);
     }
-    console.debug(logPrefix, "Native host returned no token");
+    console.debug(logPrefix, "Native host returned no token", response);
     return "";
   }
 
