@@ -58,12 +58,14 @@
     console.debug(logPrefix, "Requesting referral token from native host");
     const response = await sendMessageToHost({ command: "getReferralToken" });
     if (response && typeof response.referralToken === "string") {
-      console.debug(logPrefix, "Native host returned referralToken field");
-      return normalizeToken(response.referralToken);
+      const normalized = normalizeToken(response.referralToken);
+      console.debug(logPrefix, "Native host returned referralToken field", normalized || "<empty>", response.messageId);
+      return normalized;
     }
     if (response && typeof response.token === "string") {
-      console.debug(logPrefix, "Native host returned token field");
-      return normalizeToken(response.token);
+      const normalized = normalizeToken(response.token);
+      console.debug(logPrefix, "Native host returned token field", normalized || "<empty>", response.messageId);
+      return normalized;
     }
     console.debug(logPrefix, "Native host returned no token", response);
     return "";

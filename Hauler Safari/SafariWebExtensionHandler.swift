@@ -20,8 +20,14 @@ private enum ReferralDefaults {
     static let appGroupIdentifier = "group.com.hauler.shared"
     static let tokenKey = "referralToken"
 
+    private static let appGroupDefaults = UserDefaults(suiteName: appGroupIdentifier)
+
+    static var usingAppGroup: Bool {
+        appGroupDefaults != nil
+    }
+
     static var shared: UserDefaults {
-        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+        appGroupDefaults ?? .standard
     }
 }
 
@@ -147,7 +153,11 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     private func storedToken() -> String {
         let stored = ReferralDefaults.shared.string(forKey: ReferralDefaults.tokenKey) ?? ""
         let normalized = ReferralSettings.normalizedToken(stored)
-        logger.debug("Fetching stored token: \(normalized, privacy: .public)")
+        if normalized.isEmpty {
+            logger.debug("Fetching stored token: <empty> (app group available: \(ReferralDefaults.usingAppGroup, privacy: .public))")
+        } else {
+            logger.debug("Fetching stored token: \(normalized, privacy: .public) (app group available: \(ReferralDefaults.usingAppGroup, privacy: .public))")
+        }
         return normalized
     }
 }

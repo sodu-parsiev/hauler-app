@@ -63,8 +63,9 @@ async function handleMessage(request) {
 
   // Fallback so the content script still gets a predictable shape.
   if (payload.command === "getReferralToken" || payload.command === "getReferral") {
+    const messageId = payload?.messageId;
     console.debug(logPrefix, "Native response missing; returning empty token fallback", describeCommand(payload));
-    return { referralToken: "", token: "" };
+    return { referralToken: "", token: "", messageId };
   }
 
   return {};
