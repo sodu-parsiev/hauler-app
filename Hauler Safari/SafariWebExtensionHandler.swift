@@ -6,8 +6,8 @@
 //
 
 import Foundation
+import OSLog
 import SafariServices
-import os.log
 
 private enum ExtensionCommand: String {
     case getReferralToken = "getReferralToken"
@@ -20,12 +20,20 @@ private enum ReferralDefaults {
     static let appGroupIdentifier = "group.com.hauler.shared"
     static let tokenKey = "referralToken"
 
+    private static let appGroupDefaults = UserDefaults(suiteName: appGroupIdentifier)
+
+    static var usingAppGroup: Bool {
+        appGroupDefaults != nil
+    }
+
     static var shared: UserDefaults {
-        UserDefaults(suiteName: appGroupIdentifier) ?? .standard
+        appGroupDefaults ?? .standard
     }
 }
 
 class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
+
+    private let logger = Logger(subsystem: "com.sodikjon.hauler", category: "SafariWebExtensionHandler")
 
     func beginRequest(with context: NSExtensionContext) {
         let request = context.inputItems.first as? NSExtensionItem
@@ -65,18 +73,25 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
         var response: [String: Any]
 
+        logger.debug("Handling command: \(commandValue ?? "unknown", privacy: .public) (messageId: \(messageId ?? "none", privacy: .public))")
+
         switch command {
         case .getReferralToken:
+            let token = storedToken()
+            logger.debug("Received getReferralToken request. Returning token: \(token, privacy: .public)")
             response = [
-                "referralToken": storedToken()
+                "referralToken": token
             ]
         case .getReferral:
+            let token = storedToken()
+            logger.debug("Received getReferral request. Returning token: \(token, privacy: .public)")
             response = [
-                "token": storedToken()
+                "token": token
             ]
         case .setReferral:
             let rawToken = payload?["token"] as? String ?? ""
             let normalized = ReferralSettings.normalizedToken(rawToken)
+            logger.debug("Received setReferral request. Raw token: \(rawToken, privacy: .public), normalized: \(normalized, privacy: .public)")
             ReferralDefaults.shared.set(normalized, forKey: ReferralDefaults.tokenKey)
             response = [
                 "token": normalized
@@ -86,6 +101,7 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             let normalized = ReferralSettings.normalizedToken(providedToken)
             let token = normalized.isEmpty ? storedToken() : normalized
             let link = ReferralSettings.referralLink(for: token).absoluteString
+            logger.debug("Received referralLink request. Provided token: \(providedToken, privacy: .public), normalized: \(normalized, privacy: .public), using token: \(token, privacy: .public)")
             response = [
                 "token": token,
                 "link": link
@@ -136,6 +152,12 @@ class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
 
     private func storedToken() -> String {
         let stored = ReferralDefaults.shared.string(forKey: ReferralDefaults.tokenKey) ?? ""
-        return ReferralSettings.normalizedToken(stored)
+        let normalized = ReferralSettings.normalizedToken(stored)
+        if normalized.isEmpty {
+            logger.debug("Fetching stored token: <empty> (app group available: \(ReferralDefaults.usingAppGroup, privacy: .public))")
+        } else {
+            logger.debug("Fetching stored token: \(normalized, privacy: .public) (app group available: \(ReferralDefaults.usingAppGroup, privacy: .public))")
+        }
+        return normalized
     }
 }
