@@ -24,48 +24,21 @@
   }
 
   async function sendMessageToHost(payload) {
-    if (extensionRuntime && typeof extensionRuntime.runtime?.sendNativeMessage === "function") {
-      try {
-        const response = await extensionRuntime.runtime.sendNativeMessage(payload);
-        if (response && typeof response === "object") {
-          return response;
-        }
-      } catch (error) {
-        console.warn("sendNativeMessage failed", error);
-      }
+    if (!extensionRuntime || typeof extensionRuntime.runtime?.sendMessage !== "function") {
+      return {};
     }
 
-    if (typeof safari !== "undefined" && safari.extension?.dispatchMessage && typeof safari.self !== "undefined") {
-      return new Promise((resolve, reject) => {
-        const messageId = `hauler-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-        function cleanup(result, error) {
-          try {
-            safari.self.removeEventListener("message", handler, false);
-          } catch (_) {}
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result || {});
-          }
-        }
-
-        function handler(event) {
-          const data = event?.message || event;
-          if (!data || (data.messageId && data.messageId !== messageId)) {
-            return;
-          }
-          cleanup(data.payload || data, null);
-        }
-
-        safari.self.addEventListener("message", handler, false);
-
-        try {
-          safari.extension.dispatchMessage("nativeMessage", { messageId, payload });
-        } catch (error) {
-          cleanup(null, error);
-        }
+    try {
+      const response = await extensionRuntime.runtime.sendMessage({
+        type: "hauler:native",
+        payload,
       });
+
+      if (response && typeof response === "object") {
+        return response;
+      }
+    } catch (error) {
+      console.warn("Unable to reach extension background", error);
     }
 
     return {};
