@@ -3,7 +3,14 @@
   "name": "Hauler Helper",
   "version": "1.0.2",
   "description": "Open marketplace links in Hauler and access community tools directly.",
-  "permissions": ["storage", "scripting", "activeTab", "clipboardWrite"],
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "clipboardWrite",
+    "nativeMessaging"
+  ],
+  "nativeMessagingHost": "com.sodikjon.hauler.native",
   "host_permissions": [
     "*://*.taobao.com/*",
     "*://*.tmall.com/*",

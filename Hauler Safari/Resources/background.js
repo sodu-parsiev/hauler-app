@@ -11,18 +11,25 @@ extensionRuntime.runtime.onInstalled.addListener(() => {
 
 async function sendNativePayload(payload) {
   const api = extensionRuntime.runtime;
-  if (!api?.sendNativeMessage) return null;
+  if (!api?.sendNativeMessage) {
+    console.warn("Native messaging API unavailable in this browser context");
+    return null;
+  }
 
   try {
     // Safari supports a single-argument form; Chromium/Firefox require a host name.
     if (api.sendNativeMessage.length === 1) {
+      console.info("Sending native message via Safari runtime", payload);
       return await api.sendNativeMessage(payload);
     }
 
     const manifestHost = api.getManifest?.()?.nativeMessagingHost;
     if (manifestHost) {
+      console.info("Sending native message to host", manifestHost, payload);
       return await api.sendNativeMessage(manifestHost, payload);
     }
+
+    console.warn("Native messaging host missing from manifest");
   } catch (error) {
     console.warn("Native messaging failed", error);
   }

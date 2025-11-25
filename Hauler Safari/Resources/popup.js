@@ -16,13 +16,30 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function sendNativeMessage(payload) {
+    const runtime = extensionAPI?.runtime;
+    if (!runtime?.sendNativeMessage) {
+        console.warn("Native messaging API unavailable in this browser context");
+        return {};
+    }
+
     try {
-        const response = await extensionAPI.runtime.sendNativeMessage(payload);
-        return response || {};
+        // Safari supports a single-argument form; Chromium requires the host name.
+        if (runtime.sendNativeMessage.length === 1) {
+            return (await runtime.sendNativeMessage(payload)) || {};
+        }
+
+        const manifestHost = runtime.getManifest?.()?.nativeMessagingHost;
+        if (manifestHost) {
+            return (await runtime.sendNativeMessage(manifestHost, payload)) || {};
+        }
+
+        console.warn("Native messaging host missing from manifest");
     } catch (error) {
         console.error("Native message failed", error);
         throw error;
     }
+
+    return {};
 }
 
 async function loadReferralToken() {
