@@ -50,6 +50,16 @@ header p {
     outline-offset: 2px;
 }
 
+#referralLinkContainer .field {
+    margin: 0;
+}
+
+#referralLinkContainer:not([hidden]) input {
+    border-color: #ff9f0a;
+    background-color: rgba(255, 159, 10, 0.12);
+    box-shadow: 0 0 0 2px rgba(255, 159, 10, 0.25);
+}
+
 .actions {
     display: flex;
     flex-direction: column;

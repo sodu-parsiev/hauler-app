@@ -4,6 +4,8 @@ const tokenInput = document.getElementById("referralToken");
 const saveButton = document.getElementById("saveToken");
 const copyButton = document.getElementById("copyLink");
 const statusElement = document.getElementById("status");
+const referralLinkContainer = document.getElementById("referralLinkContainer");
+const referralLinkDisplay = document.getElementById("referralLinkDisplay");
 
 let savedToken = "";
 let statusTimeoutId;
@@ -66,6 +68,8 @@ async function handleSaveToken(event) {
 async function handleCopyLink(event) {
     event.preventDefault();
 
+    hideReferralLinkDisplay();
+
     let response;
     let referralLink = "";
 
@@ -93,12 +97,25 @@ async function handleCopyLink(event) {
 
         await navigator.clipboard.writeText(referralLink);
         showStatus("Referral link copied");
+        hideReferralLinkDisplay();
     } catch (error) {
         console.error("Copy failed", error);
         showStatus("Unable to copy referral link", true);
         const fallbackLink = referralLink || "https://haulerbuy.com/";
-        alert(`We couldn't copy your referral link automatically. Copy it manually:\n${fallbackLink}`);
+        showReferralLinkDisplay(fallbackLink);
     }
+}
+
+function showReferralLinkDisplay(link) {
+    referralLinkDisplay.value = link;
+    referralLinkContainer.hidden = false;
+    referralLinkDisplay.focus();
+    referralLinkDisplay.select();
+}
+
+function hideReferralLinkDisplay() {
+    referralLinkDisplay.value = "";
+    referralLinkContainer.hidden = true;
 }
 
 function showStatus(message, isError = false) {
