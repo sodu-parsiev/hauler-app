@@ -1,0 +1,13 @@
+{
+  "name": "com.sodikjon.hauler.native",
+  "description": "Hauler desktop app native messaging host",
+  "path": "/Applications/Hauler.app/Contents/MacOS/Hauler",
+  "type": "stdio",
+  "allowed_extensions": [
+    "com.sodikjon.hauler.safari"
+  ],
+  "allowed_origins": [
+    "chrome-extension://__MSG_HAULER_HELPER_EXTENSION_ID__/",
+    "chrome-extension://__MSG_HAULER_HELPER_DEV_EXTENSION_ID__/"
+  ]
+}
