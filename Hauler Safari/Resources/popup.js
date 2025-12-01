@@ -96,16 +96,14 @@ async function handleCopyLink(event) {
     } catch (error) {
         console.error("Copy failed", error);
         showStatus("Unable to copy referral link", true);
+        closePopup();
         const fallbackLink = referralLink || "https://haulerbuy.com/";
         alert(`We couldn't copy your referral link automatically. Copy it manually:\n${fallbackLink}`);
     }
 }
 
 function showStatus(message, isError = false) {
-    if (statusTimeoutId) {
-        clearTimeout(statusTimeoutId);
-        statusTimeoutId = undefined;
-    }
+    clearStatusTimeout();
 
     statusElement.textContent = message;
     statusElement.hidden = false;
@@ -117,5 +115,25 @@ function showStatus(message, isError = false) {
             statusElement.classList.remove("error");
             statusTimeoutId = undefined;
         }, 2000);
+    }
+}
+
+function clearStatusTimeout() {
+    if (statusTimeoutId) {
+        clearTimeout(statusTimeoutId);
+        statusTimeoutId = undefined;
+    }
+}
+
+function closePopup() {
+    clearStatusTimeout();
+    const mainElement = document.querySelector("main");
+
+    if (mainElement) {
+        mainElement.hidden = true;
+    }
+
+    if (typeof window !== "undefined" && typeof window.close === "function") {
+        window.close();
     }
 }
