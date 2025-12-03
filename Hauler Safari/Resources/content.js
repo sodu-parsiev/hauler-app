@@ -268,16 +268,8 @@
     const link = buildReferralLink(normalizedToken) || REFERRAL_BASE_URL;
 
     if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-      referralModal.openModal({
-        title: "Copy your referral link",
-        message: "Copy this referral link manually.",
-        link,
-        primaryLabel: "Copy link",
-        onPrimary: async ({ setStatus }) => {
-          const success = await copyReferralLink(link);
-          setStatus(success ? "Link copied" : "Copy unsuccessful. Please copy manually.");
-        },
-      });
+        hidePopup();
+        window.openCantCopyReferralModal(link);
       return;
     }
 
@@ -286,16 +278,8 @@
       showCopySuccess(button);
     } catch (error) {
       console.error("Failed to copy referral link", error);
-      referralModal.openModal({
-        title: "Couldn't copy automatically",
-        message: "Copy the referral link manually.",
-        link,
-        primaryLabel: "Copy link",
-        onPrimary: async ({ setStatus }) => {
-          const success = await copyReferralLink(link);
-          setStatus(success ? "Link copied" : "Copy unsuccessful. Please copy manually.");
-        },
-      });
+      hidePopup();
+      window.openCantCopyReferralModal(link);
     }
   }
 
@@ -733,4 +717,17 @@
    history.pushState = function () { origPush.apply(this, arguments); setTimeout(reeval, 0); };
    history.replaceState = function () { origReplace.apply(this, arguments); setTimeout(reeval, 0); };
    window.addEventListener("popstate", reeval);
+     
+     window.openCantCopyReferralModal = function (link) {
+         referralModal.openModal({
+           title: "Couldn't copy automatically",
+           message: "Copy the referral link manually.",
+           link,
+           primaryLabel: "Copy link",
+           onPrimary: async ({ setStatus }) => {
+             const success = await copyReferralLink(link);
+             setStatus(success ? "Link copied" : "Copy unsuccessful. Please copy manually.");
+           },
+         });
+     };
  })();
