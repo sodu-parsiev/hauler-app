@@ -446,6 +446,7 @@
        background: rgba(118,118,128,.12);
        border-radius: 12px; color: inherit; word-break: break-all; text-decoration: none;
        border: 1px solid rgba(60,60,67,.3);
+       font-size: 14px;
      }
      .hb-referral-link:focus-visible { outline: 2px solid rgba(0,122,255,.6); outline-offset: 2px; }
      .hb-referral-status { margin: 0; font-size: 13px; min-height: 18px; color: #0a7b5f; }
