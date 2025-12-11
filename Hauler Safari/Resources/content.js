@@ -5,7 +5,7 @@
   const LOGO_URL = "https://haulerbuy.com/wp-content/uploads/2025/09/cropped-hauler-logo.svg";
   const SECONDARY_MODE = "copy";
   const REFERRAL_BASE_URL = "https://haulerbuy.com/";
-  const REFERRAL_LINK_TEMPLATE = `${REFERRAL_BASE_URL}?ref=`;
+  const REFERRAL_LINK_TEMPLATE = `${REFERRAL_BASE_URL}?aff=`;
 
    // run only on supported marketplaces
    const host = location.hostname;
@@ -107,6 +107,144 @@
     }, 1800);
   }
 
+  function createReferralModal() {
+    const modalOverlay = document.createElement("div");
+    modalOverlay.id = "hb-referral-modal";
+    modalOverlay.innerHTML = `
+      <div class="hb-referral-scrim" aria-hidden="true"></div>
+      <div class="hb-referral-card" role="dialog" aria-modal="true" aria-labelledby="hb-referral-title" aria-describedby="hb-referral-message">
+        <div class="hb-referral-header">
+          <h2 id="hb-referral-title">Share your referral link</h2>
+          <button type="button" class="hb-referral-close" aria-label="Close modal">×</button>
+        </div>
+        <p id="hb-referral-message" class="hb-referral-message"></p>
+        <a id="hb-referral-link" class="hb-referral-link" href="#" target="_blank" rel="noreferrer noopener"></a>
+        <p id="hb-referral-status" class="hb-referral-status" aria-live="polite"></p>
+        <div class="hb-referral-actions">
+          <button type="button" id="hb-referral-primary" class="hb-referral-btn hb-referral-btn-primary">Copy link</button>
+          <button type="button" id="hb-referral-secondary" class="hb-referral-btn hb-referral-btn-secondary">Close</button>
+        </div>
+      </div>
+    `;
+
+    document.documentElement.appendChild(modalOverlay);
+
+    const scrim = modalOverlay.querySelector(".hb-referral-scrim");
+    const dialog = modalOverlay.querySelector(".hb-referral-card");
+    const closeBtn = modalOverlay.querySelector(".hb-referral-close");
+    const primaryBtn = modalOverlay.querySelector("#hb-referral-primary");
+    const secondaryBtn = modalOverlay.querySelector("#hb-referral-secondary");
+    const linkEl = modalOverlay.querySelector("#hb-referral-link");
+    const messageEl = modalOverlay.querySelector("#hb-referral-message");
+    const statusEl = modalOverlay.querySelector("#hb-referral-status");
+
+    let lastFocused = null;
+    let primaryHandler = null;
+
+    function closeModal() {
+      modalOverlay.classList.remove("hb-referral-open");
+      statusEl.textContent = "";
+      if (lastFocused && typeof lastFocused.focus === "function") {
+        lastFocused.focus();
+      }
+      lastFocused = null;
+    }
+
+    function trapFocus(event) {
+      if (!modalOverlay.classList.contains("hb-referral-open")) return;
+      const focusableSelectors = "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
+      const focusable = dialog.querySelectorAll(focusableSelectors);
+      const focusableArray = Array.from(focusable).filter((el) => !el.hasAttribute("disabled"));
+      if (focusableArray.length === 0) return;
+
+      const first = focusableArray[0];
+      const last = focusableArray[focusableArray.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function openModal({ title, message, link, primaryLabel = "Copy link", secondaryLabel = "Close", onPrimary }) {
+      messageEl.textContent = message || "";
+      linkEl.textContent = link || REFERRAL_BASE_URL;
+      linkEl.href = link || REFERRAL_BASE_URL;
+      primaryBtn.textContent = primaryLabel;
+      secondaryBtn.textContent = secondaryLabel;
+      primaryHandler = onPrimary || null;
+      statusEl.textContent = "";
+
+      if (title) {
+        dialog.querySelector("#hb-referral-title").textContent = title;
+      }
+
+      lastFocused = document.activeElement;
+      modalOverlay.classList.add("hb-referral-open");
+      setTimeout(() => primaryBtn.focus(), 0);
+    }
+
+    function handlePrimary(event) {
+      event.preventDefault();
+      if (typeof primaryHandler === "function") {
+        primaryHandler({ closeModal, setStatus: (text) => { statusEl.textContent = text; } });
+      }
+    }
+
+    function handleKeydown(event) {
+      if (!modalOverlay.classList.contains("hb-referral-open")) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeModal();
+      } else if (event.key === "Tab") {
+        trapFocus(event);
+      }
+    }
+
+    scrim.addEventListener("click", closeModal);
+    closeBtn.addEventListener("click", closeModal);
+    secondaryBtn.addEventListener("click", closeModal);
+    primaryBtn.addEventListener("click", handlePrimary);
+    document.addEventListener("keydown", handleKeydown);
+
+    return { openModal, closeModal, setStatus: (text) => { statusEl.textContent = text; } };
+  }
+
+  const referralModal = createReferralModal();
+
+  async function copyReferralLink(link) {
+    const sanitizedLink = link || "";
+    if (!sanitizedLink) return false;
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      try {
+        await navigator.clipboard.writeText(sanitizedLink);
+        return true;
+      } catch (_) {
+        // Fallback below
+      }
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = sanitizedLink;
+    textarea.setAttribute("readonly", "readonly");
+    textarea.style.position = "absolute";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    let success = false;
+    try {
+      success = document.execCommand("copy");
+    } catch (_) {
+      success = false;
+    }
+    textarea.remove();
+    return success;
+  }
+
   async function shareReferralLink(button) {
     const token = await getReferralToken(true);
     const normalizedToken = normalizeToken(token);
@@ -114,14 +252,25 @@
     cachedReferralToken = normalizedToken.length > 0 ? normalizedToken : null;
 
     if (!normalizedToken) {
-      alert("Add your referral token in the Hauler app to share your link.");
+      referralModal.openModal({
+        title: "Add your referral token",
+        message: "Add your referral token in the Hauler app to share your link.",
+        link: REFERRAL_BASE_URL,
+        primaryLabel: "Copy base link",
+        onPrimary: async ({ setStatus }) => {
+          const success = await copyReferralLink(REFERRAL_BASE_URL);
+          setStatus(success ? "Link copied" : "Copy unsuccessful. Please copy manually.");
+        },
+      });
       return;
     }
 
-    const link = buildReferralLink(normalizedToken) || REFERRAL_BASE_URL;
+    // const link = buildReferralLink(normalizedToken) || REFERRAL_BASE_URL;
+      const link = `${haulerUrl}&aff=${normalizedToken}`;
 
     if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
-      alert(`Copy this referral link manually:\n${link}`);
+        hidePopup();
+        window.openCantCopyReferralModal(link);
       return;
     }
 
@@ -130,7 +279,8 @@
       showCopySuccess(button);
     } catch (error) {
       console.error("Failed to copy referral link", error);
-      alert(`Couldn't copy the referral link automatically. Copy it manually:\n${link}`);
+      hidePopup();
+      window.openCantCopyReferralModal(link);
     }
   }
 
@@ -256,6 +406,71 @@
    const style = document.createElement("style");
    style.textContent = `
      #hb-overlay, #hb-overlay * { box-sizing: border-box; }
+
+     /* Referral modal */
+     #hb-referral-modal {
+       position: fixed;
+       inset: 0;
+       display: none;
+       align-items: center;
+       justify-content: center;
+       z-index: 2147483646;
+       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,Helvetica,Arial,sans-serif;
+     }
+     #hb-referral-modal.hb-referral-open { display: flex; }
+     .hb-referral-scrim {
+       position: absolute; inset: 0;
+       background: rgba(0,0,0,.55);
+       backdrop-filter: blur(6px);
+     }
+     .hb-referral-card {
+       position: relative;
+       background: #fff;
+       border-radius: 20px;
+       padding: 24px 22px;
+       width: min(90vw, 360px);
+       box-shadow: 0 16px 48px rgba(0,0,0,.25);
+       color: #111;
+       display: flex; flex-direction: column; gap: 12px;
+       z-index: 1;
+     }
+     .hb-referral-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+     .hb-referral-header h2 { margin: 0; font-size: 18px; font-weight: 800; }
+     .hb-referral-close {
+       border: none; background: transparent; color: #555;
+       font-size: 22px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+     }
+     .hb-referral-close:hover, .hb-referral-close:focus-visible { background: rgba(0,0,0,.06); outline: none; }
+     .hb-referral-message { margin: 0; font-size: 14px; color: #444; }
+     .hb-referral-link {
+       display: block; padding: 10px 12px;
+       background: rgba(118,118,128,.12);
+       border-radius: 12px; color: inherit; word-break: break-all; text-decoration: none;
+       border: 1px solid rgba(60,60,67,.3);
+       font-size: 14px;
+     }
+     .hb-referral-link:focus-visible { outline: 2px solid rgba(0,122,255,.6); outline-offset: 2px; }
+     .hb-referral-status { margin: 0; font-size: 13px; min-height: 18px; color: #0a7b5f; }
+     .hb-referral-actions { display: flex; flex-direction: column; gap: 10px; }
+     .hb-referral-btn {
+       padding: 12px 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700;
+       cursor: pointer; transition: transform .12s ease, box-shadow .12s ease;
+     }
+     .hb-referral-btn:active { transform: scale(.98); }
+     .hb-referral-btn-primary {
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       color: #fff; box-shadow: 0 6px 12px rgba(102,126,234,.35);
+     }
+     .hb-referral-btn-secondary {
+       background: rgba(118,118,128,.12); color: inherit; border: 1px solid rgba(60,60,67,.3);
+     }
+     @media (prefers-color-scheme: dark) {
+       .hb-referral-card { background: #1c1c1e; color: #f2f2f7; box-shadow: 0 16px 48px rgba(0,0,0,.5); }
+       .hb-referral-message { color: #e5e5ea; }
+       .hb-referral-link { background: rgba(118,118,128,.24); border-color: rgba(235,235,245,.3); }
+       .hb-referral-btn-secondary { background: rgba(118,118,128,.24); border-color: rgba(235,235,245,.3); color: #f2f2f7; }
+       .hb-referral-status { color: #4ed1b3; }
+     }
 
      /* Dim + blur background (below confetti) */
      #hb-overlay {
@@ -504,4 +719,17 @@
    history.pushState = function () { origPush.apply(this, arguments); setTimeout(reeval, 0); };
    history.replaceState = function () { origReplace.apply(this, arguments); setTimeout(reeval, 0); };
    window.addEventListener("popstate", reeval);
+     
+     window.openCantCopyReferralModal = function (link) {
+         referralModal.openModal({
+           title: "Copy affiliate link",
+           message: "Copy the referral link manually.",
+           link,
+           primaryLabel: "Copy link",
+           onPrimary: async ({ setStatus }) => {
+             const success = await copyReferralLink(link);
+             setStatus(success ? "Link copied" : "Copy unsuccessful. Please copy manually.");
+           },
+         });
+     };
  })();
