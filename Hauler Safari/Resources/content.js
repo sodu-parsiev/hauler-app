@@ -5,7 +5,7 @@
   const LOGO_URL = "https://haulerbuy.com/wp-content/uploads/2025/09/cropped-hauler-logo.svg";
   const SECONDARY_MODE = "copy";
   const REFERRAL_BASE_URL = "https://haulerbuy.com/";
-  const REFERRAL_LINK_TEMPLATE = `${REFERRAL_BASE_URL}?ref=`;
+  const REFERRAL_LINK_TEMPLATE = `${REFERRAL_BASE_URL}?aff=`;
 
    // run only on supported marketplaces
    const host = location.hostname;
@@ -265,7 +265,8 @@
       return;
     }
 
-    const link = buildReferralLink(normalizedToken) || REFERRAL_BASE_URL;
+    // const link = buildReferralLink(normalizedToken) || REFERRAL_BASE_URL;
+      const link = `${haulerUrl}&aff=${normalizedToken}`;
 
     if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
         hidePopup();
@@ -721,7 +722,7 @@
      
      window.openCantCopyReferralModal = function (link) {
          referralModal.openModal({
-           title: "Couldn't copy automatically",
+           title: "Copy affiliate link",
            message: "Copy the referral link manually.",
            link,
            primaryLabel: "Copy link",
